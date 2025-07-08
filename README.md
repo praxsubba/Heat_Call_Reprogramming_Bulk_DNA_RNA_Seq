@@ -81,9 +81,9 @@
 
 ---
 
-## RNA-Seq Differential Expression and Gene Set Enrichment Pipeline
+### RNA-Seq Differential Expression and Gene Set Enrichment Pipeline
 
-### 1. Setup and Data Preparation
+### 21. Setup and Data Preparation
 **Input:**  
 Raw RNA-seq quantification files (Salmon output), sample metadata, transcript-to-gene mapping files, gene set files (Hallmark, KEGG, GO), hypothalamic gene list (optional)
 
@@ -94,7 +94,7 @@ Raw RNA-seq quantification files (Salmon output), sample metadata, transcript-to
 - Prepare transcript-to-gene mapping files  
 - Prepare gene set files for enrichment analysis
 
-### 2. Data Import and Preprocessing
+### 22. Data Import and Preprocessing
 **Tools:**  
 `tximport`, `DESeq2`, `limma`, `qusage`, `dplyr`, `tibble`, `readr`, `ggplot2`, `apeglm`, `ggsci`
 
@@ -104,7 +104,7 @@ Raw RNA-seq quantification files (Salmon output), sample metadata, transcript-to
 - Prepare sample information for differential expression analysis  
 - Optionally filter gene list for tissue-specific (e.g., hypothalamic) analysis
 
-### 3. Differential Expression Analysis
+### 23. Differential Expression Analysis
 **Tasks:**
 - Construct DESeq2 object from imported data  
 - Filter low-count genes  
@@ -112,14 +112,14 @@ Raw RNA-seq quantification files (Salmon output), sample metadata, transcript-to
 - Extract and shrink log2 fold changes for robust gene ranking  
 - Save results for downstream analysis
 
-### 4. Gene Set Enrichment Analysis
+### 24. Gene Set Enrichment Analysis
 **Tasks:**
 - Load gene set files (Hallmark, KEGG, GO)  
 - Prepare indices for gene set testing  
 - Run gene set enrichment tests (cameraPR)  
 - Optionally repeat for filtered gene lists (e.g., hypothalamic genes)
 
-### 5. Quality Control and Visualization
+### 25. Quality Control and Visualization
 **Tasks:**
 - Visualize sample relationships with PCA (optional)  
 - Generate scree plots for variance explained by principal components (optional)  
