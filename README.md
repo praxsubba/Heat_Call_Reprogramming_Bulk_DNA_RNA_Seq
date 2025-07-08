@@ -83,36 +83,4 @@ The pipeline covers the following key stages:
 
 ---
 
-## RRBS Pipeline Details
-
-### 1. Setup and Data Preparation
-- **Input:** RRBS methylation files, sample metadata
-- **Tasks:** Set working directory, load required R packages, import sample metadata, prepare methylation file paths
-
-### 2. Data Import and Preprocessing
-- **Tasks:** Import methylation data using `methRead`, add sample-specific covariates (sex), filter metadata to include only samples with available data
-
-### 3. Quality Control and Filtering
-- **Tasks:** Visualize methylation and coverage statistics for all samples, filter samples by coverage (e.g., minimum count = 10, maximum percentile = 98)
-
-### 4. Differential Methylation Analysis
-- **Tasks:** Merge samples, perform differential methylation analysis (with sex as a covariate), extract significantly differentially methylated CpGs (q-value < 0.05, methylation difference > 25%), analyze treatment effects separately for males and females
-
-### 5. Summary and Comparison
-- **Tasks:** Summarize and compare differential methylation results across sexes, report overlap of differentially methylated CpGs
-
-### 6. Gene Annotation
-- **Tasks:** Annotate differentially methylated CpGs with gene information using genomic coordinates, save annotated results for manual review
-
-### 7. Interaction Analysis (Sex × Treatment)
-- **Tasks:** Create interaction factors, re-analyze methylation data for interaction effects, perform pairwise comparisons between treatment groups, annotate and summarize results
-
-### 8. Additional Analyses and Visualization
-- **Tasks:** Load and analyze specific methylation files, generate publication-ready boxplots and interaction plots for selected regions
-
-### 9. Gene Ontology (GO) Enrichment Analysis
-- **Tasks:** Prepare gene universe for GO analysis, perform enrichment analysis, visualize top enriched GO terms
-
----
-
 **This pipeline is designed for robust, reproducible analysis of RRBS and RNA-seq data, integrating advanced normalization, network analysis, differential methylation, and cell-type deconvolution in a single workflow.**
