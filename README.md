@@ -2,9 +2,7 @@
 
 ## Epigenetic Reprogramming Analysis: Complete and Annotated Workflow
 
-This repository provides a well-organized, thoroughly annotated, and reproducible R workflow for Reduced Representation Bisulfite Sequencing (RRBS), RNA-Sequencing of brain tissue in heat call exposed embryos. The code is structured for clarity and ready for submission to GitHub as a supplement for publication in _____.  
-
-The pipeline covers the following key stages:
+**This pipeline is designed for robust, reproducible analysis of RRBS and RNA-seq data, integrating advanced normalization, network analysis, differential methylation, differential gene expression, gene set enrichment, and cell-type deconvolution in a single workflow.**
 
 ---
 
@@ -83,4 +81,22 @@ The pipeline covers the following key stages:
 
 ---
 
-**This pipeline is designed for robust, reproducible analysis of RRBS and RNA-seq data, integrating advanced normalization, network analysis, differential methylation, and cell-type deconvolution in a single workflow.**
+## RNA-Seq Differential Expression Analysis (Supplemental R Pipeline)
+
+This repository also contains a **fully annotated and reproducible R script** for RNA-seq differential expression and gene set enrichment analysis, including both global and filtered (e.g., hypothalamic) gene expression analyses. The pipeline is modular, avoids hard-coded file paths, and is structured for maximum transparency and reproducibility.
+
+
+### Analysis Steps
+
+1. **Load Required Libraries:** Includes all necessary R packages for data import, analysis, and visualization.
+2. **Define File Paths and Sample Information:** Generic file paths for transcript-to-gene mapping, quantification files, sample metadata, and gene set files.
+3. **Read and Prepare Data:** Transcript-to-gene mapping, quantification file import, and sample metadata processing.
+4. **Import Quantification Data:** Uses `tximport` for efficient import of Salmon quantification files.
+5. **Differential Expression Analysis:** Constructs DESeq2 objects, filters low-count genes, and runs differential expression.
+6. **Results Extraction and Shrinkage:** Extracts and shrinks log2 fold changes for robust gene ranking.
+7. **Gene Set Enrichment Analysis:** Loads gene sets (Hallmark, KEGG, GO), prepares indices, and runs enrichment tests.
+8. **Hypothalamic Filtered Analysis:** Optionally filters genes to a hypothalamic gene list and repeats differential expression and enrichment.
+9. **Optional PCA for Hypothalamic Analysis:** Performs variance stabilizing transformation and PCA for sample-level visualization.
+
+---
+
