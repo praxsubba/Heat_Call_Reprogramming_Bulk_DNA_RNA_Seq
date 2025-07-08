@@ -1,4 +1,4 @@
-# WGCNA Analysis Pipeline with DESeq2 VST Normalization and Cell-Type Deconvolution
+# Bioinformatic Pipeline for Analyzing Development Reprogramming in Heat Call Exposed Embryos
 
 This repository contains a **comprehensive and well-annotated R pipeline** for performing Weighted Gene Co-expression Network Analysis (WGCNA) on raw RNA-seq count data, normalized using DESeq2's Variance Stabilizing Transformation (VST). The pipeline covers the following key stages:
 
