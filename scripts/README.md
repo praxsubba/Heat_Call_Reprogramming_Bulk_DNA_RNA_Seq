@@ -2,21 +2,6 @@
 
 This repository contains a **comprehensive and well-annotated R pipeline** for performing Weighted Gene Co-expression Network Analysis (WGCNA) on raw RNA-seq count data, normalized using DESeq2's Variance Stabilizing Transformation (VST). The pipeline covers the following key stages:
 
-- **Gene length data processing**
-- **Sample quality control**
-- **Network construction**
-- **Module detection**
-- **Trait correlation**
-- **Gene ontology enrichment**
-- **Hub gene identification**
-- **Network visualization**
-- **Cell-type enrichment**
-- **Single-cell RNA-seq data deconvolution preparation**
-- **SLURM batch script for running CIBERSORTx deconvolution** on a high-performance computing cluster
-
----
-
-## Table of Contents
 
 1. **Setup and Data Preparation**
 2. **Normalization and Quality Control**
