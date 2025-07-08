@@ -79,8 +79,6 @@
 ### 20. SLURM Batch Script for CIBERSORTx Deconvolution
 - **Tasks:** Run CIBERSORTx deconvolution on HPC using provided SLURM script
 
----
-
 ### RNA-Seq Differential Expression and Gene Set Enrichment Pipeline
 
 ### 21. Setup and Data Preparation
