@@ -9,11 +9,11 @@
 ## Pipeline Overview
 
 ### 1. Setup and Data Preparation
-- **Input:** Raw RRBS methylation files, sample metadata
+- **Input:** Raw RRBS methylation files, sample metadata  
 - **Tasks:** Load packages, set working directory, load sample metadata, prepare methylation file lists
 
 ### 2. Data Import and Preprocessing
-- **Tools:** `methylKit`, `tidyverse`, `dplyr`
+- **Tools:** `methylKit`, `tidyverse`, `dplyr`  
 - **Tasks:** Import methylation data, add sample-specific covariates (e.g., sex), filter samples based on availability
 
 ### 3. Quality Control and Filtering
@@ -26,7 +26,7 @@
 - **Tasks:** Summarize and compare differential methylation results across sexes, report overlap of differentially methylated CpGs
 
 ### 6. Gene Annotation
-- **Tools:** `GenomicRanges`
+- **Tools:** `GenomicRanges`  
 - **Tasks:** Annotate differentially methylated CpGs with gene information using genomic coordinates, save annotated results for manual review
 
 ### 7. Interaction Analysis (Sex × Treatment)
@@ -36,7 +36,7 @@
 - **Tasks:** Load and analyze specific methylation files, generate publication-ready boxplots and interaction plots for selected regions
 
 ### 9. Gene Ontology (GO) Enrichment Analysis
-- **Tools:** `goseq`, `geneLenDataBase`, `org.Gg.eg.db`
+- **Tools:** `goseq`, `geneLenDataBase`, `org.Gg.eg.db`  
 - **Tasks:** Prepare gene universe for GO analysis, perform enrichment analysis, visualize top enriched GO terms
 
 ---
@@ -44,15 +44,15 @@
 ## RNA-Sequencing Analysis (Co-Expression Network and Deconvolution)
 
 ### 10. Setup and Data Preparation
-- **Input:** Raw RNA-seq count data
+- **Input:** Raw RNA-seq count data  
 - **Tasks:** Load data, process gene length information, prepare metadata
 
 ### 11. Normalization and Quality Control
-- **Tools:** DESeq2 VST normalization
+- **Tools:** DESeq2 VST normalization  
 - **Tasks:** Normalize counts, perform sample QC, filter outliers
 
 ### 12. Network Construction and Module Detection
-- **Tools:** WGCNA
+- **Tools:** WGCNA  
 - **Tasks:** Construct co-expression network, detect gene modules
 
 ### 13. Module-Trait Relationships
@@ -81,22 +81,48 @@
 
 ---
 
-## RNA-Seq Differential Expression Analysis (Supplemental R Pipeline)
+## RNA-Seq Differential Expression and Gene Set Enrichment Pipeline
 
-This repository also contains a **fully annotated and reproducible R script** for RNA-seq differential expression and gene set enrichment analysis, including both global and filtered (e.g., hypothalamic) gene expression analyses. The pipeline is modular, avoids hard-coded file paths, and is structured for maximum transparency and reproducibility.
+### 1. Setup and Data Preparation
+**Input:**  
+Raw RNA-seq quantification files (Salmon output), sample metadata, transcript-to-gene mapping files, gene set files (Hallmark, KEGG, GO), hypothalamic gene list (optional)
 
+**Tasks:**
+- Load required R packages  
+- Set up working directory (not hard-coded for reproducibility)  
+- Load sample metadata and prepare sample information  
+- Prepare transcript-to-gene mapping files  
+- Prepare gene set files for enrichment analysis
 
-### Analysis Steps
+### 2. Data Import and Preprocessing
+**Tools:**  
+`tximport`, `DESeq2`, `limma`, `qusage`, `dplyr`, `tibble`, `readr`, `ggplot2`, `apeglm`, `ggsci`
 
-1. **Load Required Libraries:** Includes all necessary R packages for data import, analysis, and visualization.
-2. **Define File Paths and Sample Information:** Generic file paths for transcript-to-gene mapping, quantification files, sample metadata, and gene set files.
-3. **Read and Prepare Data:** Transcript-to-gene mapping, quantification file import, and sample metadata processing.
-4. **Import Quantification Data:** Uses `tximport` for efficient import of Salmon quantification files.
-5. **Differential Expression Analysis:** Constructs DESeq2 objects, filters low-count genes, and runs differential expression.
-6. **Results Extraction and Shrinkage:** Extracts and shrinks log2 fold changes for robust gene ranking.
-7. **Gene Set Enrichment Analysis:** Loads gene sets (Hallmark, KEGG, GO), prepares indices, and runs enrichment tests.
-8. **Hypothalamic Filtered Analysis:** Optionally filters genes to a hypothalamic gene list and repeats differential expression and enrichment.
-9. **Optional PCA for Hypothalamic Analysis:** Performs variance stabilizing transformation and PCA for sample-level visualization.
+**Tasks:**
+- Import RNA-seq quantification data using tximport  
+- Combine sample metadata with quantification data  
+- Prepare sample information for differential expression analysis  
+- Optionally filter gene list for tissue-specific (e.g., hypothalamic) analysis
+
+### 3. Differential Expression Analysis
+**Tasks:**
+- Construct DESeq2 object from imported data  
+- Filter low-count genes  
+- Perform differential expression analysis with DESeq2  
+- Extract and shrink log2 fold changes for robust gene ranking  
+- Save results for downstream analysis
+
+### 4. Gene Set Enrichment Analysis
+**Tasks:**
+- Load gene set files (Hallmark, KEGG, GO)  
+- Prepare indices for gene set testing  
+- Run gene set enrichment tests (cameraPR)  
+- Optionally repeat for filtered gene lists (e.g., hypothalamic genes)
+
+### 5. Quality Control and Visualization
+**Tasks:**
+- Visualize sample relationships with PCA (optional)  
+- Generate scree plots for variance explained by principal components (optional)  
+- Save results and plots for publication
 
 ---
-
