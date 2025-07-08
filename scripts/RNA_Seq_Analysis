@@ -1,0 +1,194 @@
+# RNA-seq Differential Expression & Gene Set Enrichment Pipeline
+# Script is self-contained: no RDS files are loaded.
+# All file paths are generic and should be replaced with your actual files.
+
+# --------------------------------------------------------------------------
+# 1. Load Required Libraries
+# --------------------------------------------------------------------------
+
+library(dplyr)
+library(tximport)
+library(DESeq2)
+library(readr)
+library(tibble)
+library(ggplot2)
+library(apeglm)
+library(ggsci)
+library(tidyr)
+library(limma)
+library(qusage)
+
+# --------------------------------------------------------------------------
+# 2. Define File Paths and Sample Information (replace with your actual files)
+# --------------------------------------------------------------------------
+
+# Transcript-to-gene mapping files
+tx2gene_file1 <- "tx_id.txt"
+tx2gene_file2 <- "gene_id.txt"
+
+# Quantification directory (contains subdirectories for each sample)
+quant_dir <- "quants/"
+
+# Sample information file
+sample_info_file <- "sampleInfo.csv"
+
+# Gene set files (Hallmark, KEGG, GO)
+hallmark_file <- "geneset_symbols/h.all.v6.1.symbols.rds"
+kegg_file <- "geneset_symbols/c2.cp.kegg.v6.1.symbols.rds"
+go_bio_file <- "geneset_symbols/c5.bp.v6.1.symbols.rds"
+cell_type_file <- "c8.all.v7.4.symbols.gmt"
+
+# Hypothalamic gene list (optional, for filtered analysis)
+hypothalamus_gene_list <- "DeSeq2_hypothalamus_genes.csv"
+
+# --------------------------------------------------------------------------
+# 3. Read and Prepare Data
+# --------------------------------------------------------------------------
+
+# Transcript-to-gene mapping
+tx2gene <- data.frame(
+  read.csv(tx2gene_file1, header = FALSE),
+  read.csv(tx2gene_file2, header = FALSE)
+)
+
+# Quantification files and sample IDs
+sample_dirs <- list.files(quant_dir)
+files <- file.path(quant_dir, sample_dirs, "quant.sf")
+sampleID <- gsub("_quant", "", sample_dirs)
+
+# Sample information
+treat <- read.csv(sample_info_file, header = TRUE)
+samples <- data.frame(
+  sampleID = sampleID,
+  condition = treat$Comments,
+  sex = treat$sex
+)
+samples$sex.condition <- factor(paste0(samples$sex, samples$condition))
+
+# --------------------------------------------------------------------------
+# 4. Import Quantification Data
+# --------------------------------------------------------------------------
+
+d <- tximport(files, type = "salmon", tx2gene = tx2gene)
+
+# --------------------------------------------------------------------------
+# 5. Global Differential Expression Analysis
+# --------------------------------------------------------------------------
+
+# Create DESeq2 object
+ddsTxi <- DESeqDataSetFromTximport(
+  d,
+  colData = samples,
+  design = ~ sex + condition
+)
+
+# Filter low count genes
+keep <- rowSums(counts(ddsTxi)) >= 10
+dds <- ddsTxi[keep, ]
+
+# Run DESeq2
+set.seed(1)
+dds <- DESeq(dds)
+
+# --------------------------------------------------------------------------
+# 6. Results Extraction and Shrinkage (Global)
+# --------------------------------------------------------------------------
+
+res_global <- results(dds, alpha = 0.05)
+res_global <- as.data.frame(res_global) %>%
+  rownames_to_column(var = "gene") %>%
+  arrange(padj)
+write.csv(res_global, "DeSeq2_global_results.csv")
+
+res_global <- lfcShrink(dds = dds, res = res_global, coef = "condition_treat_vs_cont", type = "apeglm")
+res_global <- as.data.frame(res_global) %>%
+  rownames_to_column(var = "gene") %>%
+  filter(abs(log2FoldChange) > 1) %>%
+  arrange(log2FoldChange)
+write.csv(res_global, "resLFC_global.csv")
+
+# --------------------------------------------------------------------------
+# 7. Gene Set Enrichment Analysis (Global)
+# --------------------------------------------------------------------------
+
+hallmark.list <- readRDS(hallmark_file)
+kegg.list <- readRDS(kegg_file)
+GO_Bio.list <- readRDS(go_bio_file)
+
+cell.type.data.file <- read.gmt(cell_type_file)
+saveRDS(cell.type.data.file, "c8.all.v7.4.symbols.RDS")
+
+resLFC_global <- read.csv("resLFC_global.csv")
+colnames(resLFC_global) <- c("gene", "baseMean", "log2FoldChange", "lfcSE", "pvalue", "padj")
+
+index.hallmark <- ids2indices(hallmark.list, resLFC_global[, 1], remove.empty = TRUE)
+index.kegg <- ids2indices(kegg.list, resLFC_global[, 1], remove.empty = TRUE)
+index.GO_Bio <- ids2indices(GO_Bio.list, resLFC_global[, 1], remove.empty = TRUE)
+
+resLFC_global <- resLFC_global[complete.cases(resLFC_global), ]
+
+cameraPR(resLFC_global$log2FoldChange, index.hallmark)
+cameraPR(resLFC_global$log2FoldChange, index.kegg)
+cameraPR(resLFC_global$log2FoldChange, index.GO_Bio)
+
+# --------------------------------------------------------------------------
+# 8. Hypothalamic Filtered Analysis (No RDS Loading)
+# --------------------------------------------------------------------------
+
+# Read hypothalamic gene list (optional)
+if (file.exists(hypothalamus_gene_list)) {
+  hypothalamus_genes <- read.csv(hypothalamus_gene_list)
+  keep_hypothalamus <- rownames(ddsTxi) %in% hypothalamus_genes$gene
+
+  ddsTxi_hypothalamus <- ddsTxi[keep_hypothalamus, ]
+  ddsTxi_hypothalamus <- DESeq(ddsTxi_hypothalamus)
+
+  res_hypothalamus <- results(ddsTxi_hypothalamus, alpha = 0.05)
+  res_hypothalamus <- as.data.frame(res_hypothalamus) %>%
+    rownames_to_column(var = "gene") %>%
+    arrange(padj)
+  write.csv(res_hypothalamus, "DeSeq2_hypothalamus_results.csv")
+
+  resLFC_hypothalamus <- lfcShrink(dds = ddsTxi_hypothalamus, res = res_hypothalamus, coef = "condition_treat_vs_cont", type = "apeglm")
+  resLFC_hypothalamus <- as.data.frame(resLFC_hypothalamus) %>%
+    rownames_to_column(var = "gene") %>%
+    filter(abs(log2FoldChange) > 1) %>%
+    arrange(log2FoldChange)
+  write.csv(resLFC_hypothalamus, "resLFC_hypothalamus.csv")
+
+  # Gene set enrichment for hypothalamic genes
+  resLFC_hypothalamus <- read.csv("resLFC_hypothalamus.csv")
+  colnames(resLFC_hypothalamus) <- c("gene", "baseMean", "log2FoldChange", "lfcSE", "pvalue", "padj")
+
+  index.hallmark.deseq2 <- ids2indices(hallmark.list, resLFC_hypothalamus[, 1], remove.empty = TRUE)
+  index.kegg.deseq2 <- ids2indices(kegg.list, resLFC_hypothalamus[, 1], remove.empty = TRUE)
+  index.GO_Bio.deseq2 <- ids2indices(GO_Bio.list, resLFC_hypothalamus[, 1], remove.empty = TRUE)
+
+  resLFC_hypothalamus <- resLFC_hypothalamus[complete.cases(resLFC_hypothalamus), ]
+
+  cameraPR(resLFC_hypothalamus$log2FoldChange, index.hallmark.deseq2)
+  cameraPR(resLFC_hypothalamus$log2FoldChange, index.kegg.deseq2)
+  cameraPR(resLFC_hypothalamus$log2FoldChange, index.GO_Bio.deseq2)
+}
+
+# --------------------------------------------------------------------------
+# 9. Optional: PCA for Hypothalamic Analysis
+# --------------------------------------------------------------------------
+
+if (exists("ddsTxi_hypothalamus")) {
+  vsd <- vst(ddsTxi_hypothalamus, blind = FALSE)
+  pca_results <- plotPCA(vsd, intgroup = c("condition", "sex"), returnData = TRUE)
+  percentVar <- round(100 * attr(pca_results, "percentVar"))
+
+  ggplot(pca_results, aes(x = PC1, y = PC2, color = condition, shape = sex)) +
+    geom_point(size = 3) +
+    xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+    ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+    ggtitle("PCA of Hypothalamic RNA-seq Samples") +
+    theme_minimal() +
+    scale_color_brewer(palette = "Set1")
+}
+
+# --------------------------------------------------------------------------
+# End of Pipeline
+# --------------------------------------------------------------------------
